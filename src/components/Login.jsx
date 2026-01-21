@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../api/apiservice";
+import { authErrorHandler } from "../api/errorHandler";
 
 import login from "../assets/login.png";
 import atIcon from "../assets/at.png";
@@ -39,12 +40,8 @@ export default function Login() {
       return "Please enter a valid email address.";
     }
 
-    if (password.length < 8) {
-      return "Password must be at least 8 characters long.";
-    }
-
-    if (password.length > 64) {
-      return "Password must not exceed 64 characters.";
+    if (password.length < 8 || password.length > 64) {
+      return "Password must be at least 8 characters long and not exceed 64 characters.";
     }
 
     const unsupportedChars = /[<>]/;
@@ -53,32 +50,6 @@ export default function Login() {
     }
 
     return null;
-  };
-
-  // -------------------------
-  // API Error Mapping
-  // -------------------------
-  const getAuthErrorMessage = (err) => {
-    if (!err.response) {
-      return "Network error. Please check your internet connection.";
-    }
-
-    switch (err.response.status) {
-      case 401:
-        return "Invalid email or password.";
-      case 403:
-        return "Your account is not verified or is disabled.";
-      case 404:
-        return "Invalid email or password.";
-      case 423:
-        return "Your account is locked. Please contact support.";
-      case 429:
-        return "Too many login attempts. Please try again later.";
-      case 500:
-        return "Something went wrong. Please try again later.";
-      default:
-        return "Login failed. Please try again.";
-    }
   };
 
   // -------------------------
@@ -100,10 +71,10 @@ export default function Login() {
         password,
       });
 
-      localStorage.setItem("token", res.data.accessToken);
+      localStorage.setItem("token", res.accessToken);
       navigate("/dashboard");
     } catch (err) {
-      setError(getAuthErrorMessage(err));
+      setError(authErrorHandler(err));
     } finally {
       setLoading(false);
     }

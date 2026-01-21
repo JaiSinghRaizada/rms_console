@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import { userApi } from "../api/apiservice";
+import { authErrorHandler } from "../api/errorHandler";
 
 import login from "../assets/login.png";
 import lockIcon from "../assets/lock.png";
@@ -32,19 +33,12 @@ export default function Resetpass() {
     setError("");
 
     try {
-      await axios.post(
-        "http://127.0.0.1:8088/api/user/set-password",
-        { email,
-          passWord: password }
-      );
+      await userApi.setPassword({ email, passWord: password });
 
       alert("Password reset successful");
       navigate("/");
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to reset password"
-      );
+      setError(authErrorHandler(err));
     } finally {
       setLoading(false);
     }

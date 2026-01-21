@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { userApi } from "../api/apiservice";
+import { authErrorHandler } from "../api/errorHandler";
 
 import login from "../assets/login.png";
 import atIcon from "../assets/at.png";
@@ -22,18 +23,12 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      await axios.post(
-        "http://127.0.0.1:8088/api/user/generate-otp",
-        { email }
-      );
+      await userApi.generateOtp({ email });
 
       // Go to OTP verification page
       navigate("/verify-otp", { state: { email } });
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to send OTP"
-      );
+      setError(authErrorHandler(err));
     } finally {
       setLoading(false);
     }

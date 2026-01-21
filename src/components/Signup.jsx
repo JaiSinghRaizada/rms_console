@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../api/apiservice";
+import { authErrorHandler } from "../api/errorHandler";
 
 import login from "../assets/login.png";
 import atIcon from "../assets/at.png";
@@ -35,9 +36,7 @@ export default function Signup() {
       alert("Signup successful");
       navigate("/");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Signup failed"
-      );
+      setError(authErrorHandler(err));
     } finally {
       setLoading(false);
     }

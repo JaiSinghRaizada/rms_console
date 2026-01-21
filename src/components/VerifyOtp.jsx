@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { userApi } from "../api/apiservice";
+import { authErrorHandler } from "../api/errorHandler";
 
 export default function VerifyOtp() {
   const navigate = useNavigate();
@@ -22,18 +23,12 @@ export default function VerifyOtp() {
     setError("");
 
     try {
-      await axios.post(
-        "http://127.0.0.1:8088/api/user/verify-otp",
-        { email, otp }
-      );
+      await userApi.verifyOtp({ email, otp });
 
       // Go to reset password page
       navigate("/reset-password", { state: { email } });
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Invalid OTP"
-      );
+      setError(authErrorHandler(err));
     } finally {
       setLoading(false);
     }
