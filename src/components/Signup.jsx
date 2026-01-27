@@ -73,25 +73,7 @@ export default function Signup() {
           />
         </div>
 
-        <div className="input-group">
-          <img src={lockIcon} className="input-icon" />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
 
-        <div className="input-group">
-          <img src={lockIcon} className="input-icon" />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
 
         {error && <p className="error">{error}</p>}
         <div className="by">By signing below, you agree to the <span className="c">Terms of use</span><br>

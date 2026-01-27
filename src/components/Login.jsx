@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../api/apiservice";
 import { authErrorHandler } from "../api/errorHandler";
+import { jwtDecode } from "jwt-decode";
 
 import login from "../assets/login.png";
 import atIcon from "../assets/at.png";
@@ -71,7 +72,10 @@ export default function Login() {
         password,
       });
 
-      localStorage.setItem("token", res.accessToken);
+      localStorage.setItem("token", res.token);
+      const decodedToken = jwtDecode(res.token);
+      const sub = decodedToken.sub;
+      localStorage.setItem("userSub", sub);
       navigate("/dashboard");
     } catch (err) {
       setError(authErrorHandler(err));

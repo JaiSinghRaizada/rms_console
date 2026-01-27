@@ -40,7 +40,7 @@ export default function VerifyOtp() {
         <h1 className="h">Verify OTP</h1>
 
         <div className="input-group">
-          <input type="email" value={email} disabled />
+          <input type="email" value={email} />
         </div>
 
         <div className="input-group">

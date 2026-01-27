@@ -81,14 +81,33 @@ body {
 .h{
   margin-bottom: 30px;
 }
-.login-right input {
-  width: 300px !important;
-  padding: 12px;
-  margin-bottom: 5px;
-  margin-top: 10;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+.input-group {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
 }
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Input field */
+.login-right input {
+  width: 300px;
+  padding: 12px 12px 12px 44px; /* ✅ space for icon */
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
 
 .forgot {
   width: 250px !important;
