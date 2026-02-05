@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const menuHttp = axios.create({
-  baseURL: "http://127.0.0.1:8088/api",
+  baseURL: "http://127.0.0.1:8088/api", 
 });
 
 menuHttp.interceptors.request.use((config) => {
