@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { menuApi } from "../../../api/menuApi";
+import SuccessToast from "../../common/SuccessToast";
 import "./menu.css";
 
 export default function AddMenu({ onClose }) {
   const [menuName, setMenuName] = useState("");
+  const [siteId, setSiteId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const organizationId = localStorage.getItem("organizationId");
 
@@ -17,66 +20,78 @@ export default function AddMenu({ onClose }) {
       return;
     }
 
-    if (!organizationId) {
-      setError("Organization not found");
-      return;
-    }
-
     setLoading(true);
     setError("");
 
-    try {
-      await menuApi.add({
-        menuName: menuName.trim(),
-        organizationId, // 🔑 REQUIRED BY BACKEND
-      });
+    const payload = {
+      menuName: menuName.trim(),
+      organizationId,
+    };
 
-      onClose();
+    if (siteId.trim()) payload.siteId = siteId.trim();
+
+    try {
+      await menuApi.add(payload);
+
+      setSuccess("Menu added successfully 🎉");
+
+      setTimeout(() => {
+        onClose();
+      }, 1200);
     } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          "Failed to add menu"
-      );
+      console.error("Add menu failed", err);
+      setError("Failed to add menu");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h3>Add Menu</h3>
+    <>
+      <SuccessToast message={success} />
 
-        {error && <p className="error-text">{error}</p>}
+      <div className="modal-overlay">
+        <div className="modal">
+          <h3>Add Menu</h3>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Menu Name"
-            value={menuName}
-            onChange={(e) => setMenuName(e.target.value)}
-          />
+          {error && <p className="error-text">{error}</p>}
 
-          <div className="modal-actions">
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Create Menu"}
-            </button>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              placeholder="Menu Name"
+              value={menuName}
+              onChange={(e) => setMenuName(e.target.value)}
+            />
 
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+            <input
+              type="text"
+              placeholder="Site ID (optional)"
+              value={siteId}
+              onChange={(e) => setSiteId(e.target.value)}
+            />
+
+            <div className="modal-actions">
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Create Menu"}
+              </button>
+
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

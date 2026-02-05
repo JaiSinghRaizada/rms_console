@@ -144,8 +144,9 @@ export default function Sites() {
                   </td>
                 </tr>
               ) : (
-                sites.map((site) => (
-                  <tr key={site._id}>
+               sites.map((site) => (
+                <tr key={site.siteId}>
+
                     {/* SITE */}
                     <td>
                       <div className="site-name">
