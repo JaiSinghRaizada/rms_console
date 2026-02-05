@@ -7,15 +7,21 @@ import DashboardLayout from "../DashboardLayout";
 import "./sites.css";
 
 export default function Sites() {
-  // ✅ FIX: read organizationId directly
+  // ================================
+  // CONTEXT + ROLE
+  // ================================
   const { organizationId, loading: orgLoading } = useOrganization();
+  const userRole = localStorage.getItem("userRole");
+
+  const canManageSites =
+    userRole === "Admin" || userRole === "Super Admin";
 
   const [sites, setSites] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   // ================================
-  // FETCH SITES
+  // FETCH SITES (SAFE)
   // ================================
   const fetchSites = async () => {
     if (!organizationId) return;
@@ -23,8 +29,6 @@ export default function Sites() {
     setLoading(true);
     try {
       const res = await siteApi.getSites(organizationId);
-
-      // backend may return { data } or array
       const siteList = res?.data ?? res ?? [];
       setSites(siteList);
     } catch (err) {
@@ -35,7 +39,6 @@ export default function Sites() {
     }
   };
 
-  // fetch when organizationId becomes available
   useEffect(() => {
     if (organizationId) {
       fetchSites();
@@ -43,9 +46,11 @@ export default function Sites() {
   }, [organizationId]);
 
   // ================================
-  // TOGGLE ACTIVE / INACTIVE
+  // TOGGLE STATUS (ROLE GUARDED)
   // ================================
   const toggleStatus = async (site) => {
+    if (!canManageSites) return;
+
     try {
       await siteApi.updateSiteStatus(site._id, !site.isActive);
       fetchSites();
@@ -55,18 +60,25 @@ export default function Sites() {
   };
 
   // ================================
-  // DELETE SITE
+  // DELETE SITE (ROLE GUARDED)
   // ================================
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this site?")) return;
+  const handleDelete = async (siteId) => {
+  if (!canManageSites) return;
 
-    try {
-      await siteApi.deleteSite(id);
-      fetchSites();
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
-  };
+  if (!siteId) {
+    console.error("Delete failed: siteId is missing");
+    return;
+  }
+
+  if (!window.confirm("Delete this site?")) return;
+
+  try {
+    await siteApi.deleteSite(siteId);
+    fetchSites();
+  } catch (err) {
+    console.error("Delete failed:", err);
+  }
+};
 
   return (
     <DashboardLayout>
@@ -75,20 +87,35 @@ export default function Sites() {
         <div className="sites-header">
           <h2>Sites</h2>
 
-          {/* ✅ Disable until org is loaded */}
           <button
             className="AddSiteBtn"
             onClick={() => setShowModal(true)}
-            disabled={orgLoading || !organizationId}
+            disabled={
+              orgLoading ||
+              !organizationId ||
+              !canManageSites
+            }
+            title={
+              !canManageSites
+                ? "You do not have permission to add sites"
+                : ""
+            }
           >
             + Add Site
           </button>
         </div>
 
-        {/* OPTIONAL MESSAGE */}
+        {/* ORG MISSING MESSAGE */}
         {!orgLoading && !organizationId && (
           <p className="error-text">
             Organization not assigned to this user
+          </p>
+        )}
+
+        {/* ROLE MESSAGE */}
+        {organizationId && !canManageSites && (
+          <p className="info-text">
+            You have read-only access to sites
           </p>
         )}
 
@@ -148,25 +175,37 @@ export default function Sites() {
                     {/* ACTIONS */}
                     <td align="right">
                       <div className="icon-actions">
-                        <button className="icon-btn" title="Edit">
+                        <button
+                          className="icon-btn"
+                          title="Edit"
+                          disabled={!canManageSites}
+                        >
                           <Pencil size={16} />
                         </button>
 
                         <button
                           className="icon-btn"
-                          title="Activate / Deactivate"
-                          onClick={() => toggleStatus(site)}
+                          title={
+                            canManageSites
+                              ? "Activate / Deactivate"
+                              : "No permission"
+                          }
+                          disabled={!canManageSites}
+                          onClick={() =>
+                            toggleStatus(site)
+                          }
                         >
                           <Power size={16} />
                         </button>
+<button
+  className="icon-btn danger"
+  title={canManageSites ? "Delete" : "No permission"}
+  disabled={!canManageSites}
+  onClick={() => handleDelete(site.siteId)}
+>
+  <Trash2 size={16} />
+</button>
 
-                        <button
-                          className="icon-btn danger"
-                          title="Delete"
-                          onClick={() => handleDelete(site._id)}
-                        >
-                          <Trash2 size={16} />
-                        </button>
                       </div>
                     </td>
                   </tr>
@@ -177,7 +216,7 @@ export default function Sites() {
         </div>
 
         {/* ADD SITE MODAL */}
-        {showModal && organizationId && (
+        {showModal && organizationId && canManageSites && (
           <AddSiteModal
             organizationId={organizationId}
             onClose={() => {

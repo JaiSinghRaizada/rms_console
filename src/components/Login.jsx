@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../api/apiservice";
 import { authErrorHandler } from "../api/errorHandler";
+import { userApi } from "../api/userApi";
 import { jwtDecode } from "jwt-decode";
 
 import login from "../assets/login.png";
@@ -17,65 +18,42 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   // -------------------------
-  // Input Validation
-  // -------------------------
-  const validateInputs = () => {
-    if (!email && !password) {
-      return "Email and password are required.";
-    }
-
-    if (!email) {
-      return "Please enter your email address.";
-    }
-
-    if (!password) {
-      return "Please enter your password.";
-    }
-
-    if (email.trim() !== email) {
-      return "Please remove extra spaces from the email address.";
-    }
-
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!emailRegex.test(email)) {
-      return "Please enter a valid email address.";
-    }
-
-    if (password.length < 8 || password.length > 64) {
-      return "Password must be at least 8 characters long and not exceed 64 characters.";
-    }
-
-    const unsupportedChars = /[<>]/;
-    if (unsupportedChars.test(email) || unsupportedChars.test(password)) {
-      return "Your input contains unsupported characters.";
-    }
-
-    return null;
-  };
-
-  // -------------------------
   // Login Handler
   // -------------------------
   const handleLogin = async () => {
-    const validationError = validateInputs();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
     setLoading(true);
     setError("");
 
     try {
+      // 🔐 LOGIN
       const res = await authApi.login({
         identifier: email.trim(),
         password,
       });
 
-      localStorage.setItem("token", res.token);
-      const decodedToken = jwtDecode(res.token);
-      const sub = decodedToken.sub;
-      localStorage.setItem("userSub", sub);
+      // 🧹 CLEAR OLD DATA
+      localStorage.clear();
+
+      // ✅ TOKEN
+      const token = res.token;
+      localStorage.setItem("token", token);
+      localStorage.setItem("accessToken", token);
+
+      // 🔎 DECODE TOKEN → USERNAME
+      const decoded = jwtDecode(token);
+      const userSub = decoded.sub;
+      localStorage.setItem("userSub", userSub);
+
+      // 👤 FETCH USER (SOURCE OF TRUTH)
+      const user = await userApi.getByUserSub(userSub);
+
+      // ✅ STORE ROLE + ORGANIZATION
+      localStorage.setItem("userRole", user.role);
+
+      if (user.organizationId) {
+        localStorage.setItem("organizationId", user.organizationId);
+      }
+
       navigate("/dashboard");
     } catch (err) {
       setError(authErrorHandler(err));

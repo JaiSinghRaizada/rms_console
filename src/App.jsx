@@ -7,6 +7,7 @@ import Sites from "./components/dashboard/sites/Sites";
 import Menu from "./components/dashboard/menu/Menu";
 import Resetpass from "./components/Resetpass";
 import VerifyOtp from "./components/VerifyOtp";
+import { OrganizationProvider } from "./context/OrganizationContext";
 import "./App.css";
 
 function App() {

@@ -8,10 +8,11 @@ export const userApi = {
     }
 
     const response = await http.get(
-      `/api/user/getbyUserName/${userSub}`
+      `/user/getbyUserName/${userSub}`
     );
 
-    // ✅ unwrap once here
+    // backend response:
+    // { status, message, data }
     return response.data.data;
   },
 };

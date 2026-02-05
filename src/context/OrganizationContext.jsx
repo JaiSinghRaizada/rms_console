@@ -1,49 +1,36 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { userApi } from "../api/userApi";
 
 const OrganizationContext = createContext(null);
 
-export const OrganizationProvider = ({ children }) => {
+export function OrganizationProvider({ children }) {
   const [organizationId, setOrganizationId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadOrganizationId = async () => {
-      try {
-        // 🔑 matches localStorage & JWT
-        const userSub = localStorage.getItem("userSub");
+    // 🔑 SINGLE SOURCE OF TRUTH
+    const storedOrgId = localStorage.getItem("organizationId");
 
-        if (!userSub) {
-          console.error("userSub not found in localStorage");
-          return;
-        }
+    if (storedOrgId) {
+      setOrganizationId(storedOrgId);
+    } else {
+      setOrganizationId(null);
+    }
 
-        // ✅ CORRECT FUNCTION NAME
-        const user = await userApi.getByUserSub(userSub);
-
-        if (!user.organizationId) {
-          console.error("User has no organization assigned");
-          return;
-        }
-
-        setOrganizationId(user.organizationId);
-      } catch (err) {
-        console.error("Failed to load user organization", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadOrganizationId();
+    setLoading(false);
   }, []);
 
   return (
     <OrganizationContext.Provider
-      value={{ organizationId, loading }}
+      value={{
+        organizationId,
+        loading,
+      }}
     >
       {children}
     </OrganizationContext.Provider>
   );
-};
+}
 
-export const useOrganization = () => useContext(OrganizationContext);
+export function useOrganization() {
+  return useContext(OrganizationContext);
+}

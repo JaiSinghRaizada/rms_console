@@ -3,17 +3,28 @@ import { Pencil, Trash2 } from "lucide-react";
 import DashboardLayout from "../DashboardLayout";
 import "./menu.css";
 
+import { menuApi } from "../../../api/menuApi";
+import AddMenu from "./AddMenu";
+
 export default function Menu() {
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
 
-  // Fetch menu items
+  const organizationId = localStorage.getItem("organizationId");
+
   const fetchMenus = async () => {
+    if (!organizationId) return;
+
     setLoading(true);
     try {
-      const res = await fetch("/menu-service"); // adjust if query params needed
-      const json = await res.json();
-      setMenus(json.data ?? json);
+      const allMenus = await menuApi.getAll();
+
+      const filtered = allMenus.filter(
+        (m) => m.organizationId === organizationId
+      );
+
+      setMenus(filtered);
     } catch (err) {
       console.error("Failed to fetch menu", err);
       setMenus([]);
@@ -24,33 +35,41 @@ export default function Menu() {
 
   useEffect(() => {
     fetchMenus();
-  }, []);
+  }, [organizationId]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this menu item?")) return;
-    await fetch(`/menu-service/${id}`, { method: "DELETE" });
-    fetchMenus();
+  const handleDelete = async (menuId) => {
+    if (!menuId) return;
+    if (!window.confirm("Delete this menu?")) return;
+
+    try {
+      await menuApi.delete(menuId);
+      fetchMenus();
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
   };
 
   return (
     <DashboardLayout>
       <div className="menu-page">
-        {/* HEADER */}
         <div className="menu-header">
-          <h2>Product</h2>
-          <button className="btn-primary">+ Add Product</button>
+          <h2>Menus</h2>
+          <button
+            className="btn-primary"
+            onClick={() => setShowAdd(true)}
+            disabled={!organizationId}
+          >
+            + Add Menu
+          </button>
         </div>
 
-        {/* TABLE */}
         <div className="menu-table-wrapper">
           <table className="menu-table">
             <thead>
               <tr>
-                <th>Product</th>
+                <th>Menu</th>
                 <th>Status</th>
-                <th>Product ID</th>
-                <th>Quality</th>
-                <th>Price</th>
+                <th>ID</th>
                 <th align="right">Action</th>
               </tr>
             </thead>
@@ -58,57 +77,31 @@ export default function Menu() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6">Loading...</td>
+                  <td colSpan="4">Loading...</td>
                 </tr>
               ) : menus.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="empty-state">
+                  <td colSpan="4" className="empty-state">
                     No menu items found
                   </td>
                 </tr>
               ) : (
-                menus.map((item) => (
-                  <tr key={item._id}>
-                    {/* PRODUCT CELL */}
+                menus.map((m) => (
+                  <tr key={m.menuId}>
+                    <td>{m.menuName}</td>
                     <td>
-                      <div className="menu-product">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="menu-img"
-                        />
-                        <span className="menu-title">{item.name}</span>
-                      </div>
+                      <span className="badge-active">Active</span>
                     </td>
-
-                    {/* STATUS */}
-                    <td>
-                      <span className="badge-active">In Stock</span>
-                    </td>
-
-                    {/* PRODUCT ID */}
-                    <td>{item.productId}</td>
-
-                    {/* QUANTITY */}
-                    <td>{item.quantity}</td>
-
-                    {/* PRICE */}
-                    <td>${item.price}</td>
-
-                    {/* ACTIONS */}
+                    <td>{m.menuId}</td>
                     <td align="right">
-                      <div className="icon-actions">
-                        <button className="icon-btn" title="Edit">
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          className="icon-btn danger"
-                          title="Delete"
-                          onClick={() => handleDelete(item._id)}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+                      <button
+                        className="icon-btn danger"
+                        onClick={() =>
+                          handleDelete(m.menuId)
+                        }
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -116,6 +109,15 @@ export default function Menu() {
             </tbody>
           </table>
         </div>
+
+        {showAdd && (
+          <AddMenu
+            onClose={() => {
+              setShowAdd(false);
+              fetchMenus();
+            }}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
