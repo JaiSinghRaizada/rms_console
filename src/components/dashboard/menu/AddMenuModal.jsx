@@ -33,10 +33,10 @@ export default function AddMenuModal({ organizationId, onClose }) {
       />
 
       <div className="modal-actions">
-        <button onClick={handleSubmit} disabled={loading}>
+        <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
           {loading ? "Saving..." : "Save"}
         </button>
-        <button onClick={() => onClose(false)}>Cancel</button>
+        <button className="btn-secondary" onClick={() => onClose(false)}>Cancel</button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import http from "./http";
 
-const SITE_API = "/site"; // ❗ NO /api here
+const SITE_API = "/site";
 
 export const siteApi = {
   // ✅ ADD SITE
@@ -20,6 +20,11 @@ export const siteApi = {
     });
 
     return data?.data ?? data;
+  },
+
+  // ✅ GET ALL (used by Menu page)
+  getAll: async (organizationId) => {
+    return await siteApi.getSites(organizationId);
   },
 
   // ✅ UPDATE STATUS

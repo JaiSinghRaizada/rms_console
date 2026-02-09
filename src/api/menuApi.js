@@ -1,31 +1,26 @@
-// src/api/menuApi.js
-import menuHttp from "./menuHttp";
+import http from "./http";
 
-// 🔑 REAL backend endpoint (from Postman)
 const MENU_API = "/menu";
 
 export const menuApi = {
-  // --------------------
-  // GET ALL MENUS
-  // --------------------
-  getAll: async () => {
-    const res = await menuHttp.get(MENU_API);
-    return res.data?.data ?? [];
-  },
-
-  // --------------------
-  // ADD MENU
-  // --------------------
+  // ✅ ADD MENU (FIXED)
   add: async (payload) => {
-    const res = await menuHttp.post(MENU_API, payload);
-    return res.data?.data;
+    const { data } = await http.post(MENU_API, payload, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+    return data;
   },
 
-  // --------------------
-  // DELETE MENU
-  // --------------------
+  // GET ALL
+  getAll: async () => {
+    const { data } = await http.get(MENU_API);
+    return data?.data ?? data;
+  },
+
   delete: async (menuId) => {
-    if (!menuId) throw new Error("menuId required");
-    await menuHttp.delete(`${MENU_API}/${menuId}`);
+    await http.delete(`${MENU_API}/${menuId}`);
   },
 };

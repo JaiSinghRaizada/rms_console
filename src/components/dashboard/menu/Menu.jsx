@@ -1,32 +1,45 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../DashboardLayout";
 import "./menu.css";
 
 import { menuApi } from "../../../api/menuApi";
+import { siteApi } from "../../../api/siteApi";
 import AddMenu from "./AddMenu";
 
 export default function Menu() {
   const [menus, setMenus] = useState([]);
+  const [sitesMap, setSitesMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
 
+  const navigate = useNavigate();
   const organizationId = localStorage.getItem("organizationId");
 
-  const fetchMenus = async () => {
+  // ================================
+  // FETCH MENUS + SITES
+  // ================================
+  const fetchData = async () => {
     if (!organizationId) return;
 
     setLoading(true);
     try {
-      const allMenus = await menuApi.getAll();
+      const [menusRes, sitesRes] = await Promise.all([
+        menuApi.getAll(),
+        siteApi.getAll(organizationId),
+      ]);
 
-      const filtered = allMenus.filter(
-        (m) => m.organizationId === organizationId
-      );
+      // Build siteId → siteName map
+      const map = {};
+      sitesRes.forEach((site) => {
+        map[String(site.siteId)] = site.siteName;
+      });
 
-      setMenus(filtered);
+      setMenus(menusRes || []);
+      setSitesMap(map);
     } catch (err) {
-      console.error("Failed to fetch menu", err);
+      console.error("Failed to fetch data", err);
       setMenus([]);
     } finally {
       setLoading(false);
@@ -34,24 +47,31 @@ export default function Menu() {
   };
 
   useEffect(() => {
-    fetchMenus();
+    fetchData();
   }, [organizationId]);
 
-  const handleDelete = async (menuId) => {
+  // ================================
+  // DELETE MENU
+  // ================================
+  const handleDelete = async (menuId, e) => {
+    e.stopPropagation(); // 🔑 prevent row click
     if (!menuId) return;
     if (!window.confirm("Delete this menu?")) return;
 
     try {
       await menuApi.delete(menuId);
-      fetchMenus();
+      alert("Menu deleted successfully ✅");
+      fetchData();
     } catch (err) {
       console.error("Delete failed", err);
+      alert("Failed to delete menu");
     }
   };
 
   return (
     <DashboardLayout>
       <div className="menu-page">
+        {/* HEADER */}
         <div className="menu-header">
           <h2>Menus</h2>
           <button
@@ -63,13 +83,14 @@ export default function Menu() {
           </button>
         </div>
 
+        {/* TABLE */}
         <div className="menu-table-wrapper">
           <table className="menu-table">
             <thead>
               <tr>
-                <th>Menu</th>
+                <th>Site Name</th>
+                <th>Menu Name</th>
                 <th>Status</th>
-                <th>ID</th>
                 <th align="right">Action</th>
               </tr>
             </thead>
@@ -86,18 +107,30 @@ export default function Menu() {
                   </td>
                 </tr>
               ) : (
-                menus.map((m) => (
-                  <tr key={m.menuId}>
-                    <td>{m.menuName}</td>
+                menus.map((menu) => (
+                  <tr
+                    key={menu.menuId} // ✅ UNIQUE KEY
+                    className="clickable-row"
+                    onClick={() =>
+                      navigate(`/menus/${menu.menuId}`)
+                    }
+                  >
+                    <td>
+                      {sitesMap[String(menu.siteId)] || "NA"}
+                    </td>
+
+                    <td>{menu.menuName}</td>
+
                     <td>
                       <span className="badge-active">Active</span>
                     </td>
-                    <td>{m.menuId}</td>
+
                     <td align="right">
                       <button
                         className="icon-btn danger"
-                        onClick={() =>
-                          handleDelete(m.menuId)
+                        title="Delete Menu"
+                        onClick={(e) =>
+                          handleDelete(menu.menuId, e)
                         }
                       >
                         <Trash2 size={16} />
@@ -110,11 +143,12 @@ export default function Menu() {
           </table>
         </div>
 
+        {/* ADD MENU MODAL */}
         {showAdd && (
           <AddMenu
             onClose={() => {
               setShowAdd(false);
-              fetchMenus();
+              fetchData();
             }}
           />
         )}

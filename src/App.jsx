@@ -8,6 +8,8 @@ import Menu from "./components/dashboard/menu/Menu";
 import Resetpass from "./components/Resetpass";
 import VerifyOtp from "./components/VerifyOtp";
 import { OrganizationProvider } from "./context/OrganizationContext";
+import MenuCategories from "./components/dashboard/menu/MenuCategories";
+import MenuItems from "./components/dashboard/menu/MenuItems";
 import "./App.css";
 
 function App() {
@@ -64,6 +66,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/sites" element={<Sites />} />
         <Route path="/menu" element={<Menu />} />
+        <Route path="/menus/:menuId" element={<MenuCategories />} />
+        <Route path="/menu-items/:categoryId" element={<MenuItems />} />
       </Routes>
     </BrowserRouter>
   );
