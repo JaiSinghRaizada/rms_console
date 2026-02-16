@@ -11,8 +11,16 @@ export default function MenuItems() {
   const [showAdd, setShowAdd] = useState(false);
 
   const fetchItems = async () => {
-    const data = await menuItemApi.getAll();
-    setItems(data.filter(i => i.categoryId === categoryId));
+    try {
+      const data = await menuItemApi.getAll();
+      const filtered = data.filter(
+        (i) => String(i.categoryId) === String(categoryId)
+      );
+      setItems(filtered);
+    } catch (err) {
+      console.error("Failed to fetch items", err);
+      setItems([]);
+    }
   };
 
   useEffect(() => {
@@ -31,6 +39,9 @@ export default function MenuItems() {
 
       <div className="page">
         <div className="page-header">
+          <button className="btn-secondary" onClick={() => window.history.back()}>
+            ← Back
+          </button>
           <h2>Menu Items</h2>
           <button className="btn-primary" onClick={() => setShowAdd(true)}>
             + Add Item
@@ -41,8 +52,11 @@ export default function MenuItems() {
           {items.length === 0 ? (
             <p>No items added yet</p>
           ) : (
-            items.map(item => (
-              <div className="menu-item-card" key={item.itemId}>
+            items.map((item) => (
+              <div
+                className="menu-item-card"
+                key={item.itemId || item._id}
+              >
                 {item.imageUrl && (
                   <img src={item.imageUrl} alt={item.itemName} />
                 )}
@@ -63,7 +77,9 @@ export default function MenuItems() {
 
                     <span
                       className={
-                        item.isAvailable ? "status active" : "status inactive"
+                        item.isAvailable
+                          ? "status active"
+                          : "status inactive"
                       }
                     >
                       {item.isAvailable ? "Available" : "Unavailable"}

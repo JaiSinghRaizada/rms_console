@@ -282,14 +282,11 @@
   align-items: center;
   justify-content: center;
 }
-
 .page {
   padding: 24px;
-  background: #ffffff !important;   /* WHITE background */
+  background: #f9fafb;
   min-height: 100%;
 }
-
-
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -308,7 +305,7 @@
   gap: 20px;
 }
 .menu-item-card {
-  background: #f3f4f6 !important;  /* Light grey */
+  background: #fff;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
   overflow: hidden;
