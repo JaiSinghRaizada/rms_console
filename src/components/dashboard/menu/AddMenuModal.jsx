@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { menuApi } from "../../../api/menuApi";
+import { Modal, Input } from "../../../common";
 
 export default function AddMenuModal({ organizationId, onClose }) {
   const [menuName, setMenuName] = useState("");
@@ -23,21 +24,29 @@ export default function AddMenuModal({ organizationId, onClose }) {
   };
 
   return (
-    <div className="modal">
-      <h3>Add Menu</h3>
-
-      <input
+    <Modal title="Add Menu">
+      <Input
         placeholder="Menu name"
         value={menuName}
         onChange={(e) => setMenuName(e.target.value)}
       />
 
       <div className="modal-actions">
-        <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+        <button
+          className="btn-primary"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
           {loading ? "Saving..." : "Save"}
         </button>
-        <button className="btn-secondary" onClick={() => onClose(false)}>Cancel</button>
+
+        <button
+          className="btn-secondary"
+          onClick={() => onClose(false)}
+        >
+          Cancel
+        </button>
       </div>
-    </div>
+    </Modal>
   );
 }

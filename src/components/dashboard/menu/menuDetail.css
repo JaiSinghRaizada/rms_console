@@ -1,0 +1,144 @@
+/* ================================
+   LAYOUT
+================================ */
+.menu-detail-layout {
+  display: flex;
+  height: 100vh;
+  background: #ffffff;
+}
+
+/* ================================
+   SIDEBAR
+================================ */
+.menu-detail-sidebar {
+  width: 220px;
+  background: #000000;
+  color: white;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.menu-detail-sidebar h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.menu-link {
+  text-decoration: none;
+  color: #d1d5db;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: 0.2s ease;
+}
+
+.menu-link:hover {
+  background: #111827;
+  color: #ffffff;
+}
+
+.menu-link.active {
+  background: #ff7a00;
+  color: white;
+  font-weight: 600;
+}
+
+/* ================================
+   CONTENT
+================================ */
+.menu-detail-content {
+  flex: 1;
+  padding: 30px;
+  background: #ffffff;
+  overflow-y: auto;
+}
+
+/* ================================
+   HEADER
+================================ */
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.menu-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* ================================
+   TABLE
+================================ */
+.menu-table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.menu-table th {
+  background: #f9fafb;
+  padding: 14px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.menu-table td {
+  padding: 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.menu-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* ================================
+   BUTTONS
+================================ */
+.btn-primary {
+  background: #ff7a00;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.icon-btn {
+  border: 1px solid #e5e7eb;
+  background: white;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.icon-btn.danger:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.action-btn-group {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: #9ca3af;
+}

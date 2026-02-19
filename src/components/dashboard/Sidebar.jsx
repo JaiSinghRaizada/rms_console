@@ -29,31 +29,9 @@ export default function Sidebar() {
         </NavLink>
 
         {/* ✅ MENU DROPDOWN STARTS HERE */}
-        <div className="sidebar-dropdown">
-          <div
-            className="sidebar-icon"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <FileText />
-            
-          </div>
-
-          {menuOpen && (
-            <div className="dropdown-menu">
-              <NavLink to="/menu" className="dropdown-item">
-                Menu
-              </NavLink>
-
-              <NavLink to="/menus/1" className="dropdown-item">
-                Menu Category
-              </NavLink>
-
-              <NavLink to="/menu-items/1" className="dropdown-item">
-                Menu Item
-              </NavLink>
-            </div>
-          )}
-        </div>
+        <NavLink to="/menu">
+        <FileText />
+        </NavLink>
 
         <NavLink to="/users">
           <User />

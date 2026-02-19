@@ -1,37 +1,41 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { menuItemApi } from "../../../api/menuItemApi";
 import AddMenuItem from "./AddMenuItem";
 import DashboardLayout from "../DashboardLayout";
 import "./menu.css";
+import { DeleteButton } from "../../../common";
 
 export default function MenuItems() {
-  const { categoryId } = useParams();
   const [items, setItems] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchItems = async () => {
     try {
+      setLoading(true);
       const data = await menuItemApi.getAll();
-      const filtered = data.filter(
-        (i) => String(i.categoryId) === String(categoryId)
-      );
-      setItems(filtered);
-    } catch (err) {
-      console.error("Failed to fetch items", err);
+      setItems(data || []);
+    } catch {
       setItems([]);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleDeleteItem = async (menuItemId) => {
+    if (!menuItemId) return;
+    await menuItemApi.delete(menuItemId);
+    fetchItems();
   };
 
   useEffect(() => {
     fetchItems();
-  }, [categoryId]);
+  }, []);
 
   return (
     <DashboardLayout>
       {showAdd && (
         <AddMenuItem
-          categoryId={categoryId}
           onSuccess={fetchItems}
           onClose={() => setShowAdd(false)}
         />
@@ -39,40 +43,51 @@ export default function MenuItems() {
 
       <div className="page">
         <div className="page-header">
-          <button className="btn-secondary" onClick={() => window.history.back()}>
-            ← Back
-          </button>
           <h2>Menu Items</h2>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button
+            className="btn-primary"
+            onClick={() => setShowAdd(true)}
+          >
             + Add Item
           </button>
         </div>
 
         <div className="menu-item-grid">
-          {items.length === 0 ? (
+          {loading ? (
+            <p>Loading...</p>
+          ) : items.length === 0 ? (
             <p>No items added yet</p>
           ) : (
             items.map((item) => (
               <div
                 className="menu-item-card"
-                key={item.itemId || item._id}
+                key={item._id}
               >
                 {item.imageUrl && (
-                  <img src={item.imageUrl} alt={item.itemName} />
+                  <img
+                    src={item.imageUrl}
+                    alt={item.itemName}
+                  />
                 )}
 
                 <div className="card-body">
                   <h4>{item.itemName}</h4>
 
                   {item.description && (
-                    <p className="desc">{item.description}</p>
+                    <p className="desc">
+                      {item.description}
+                    </p>
                   )}
 
                   <div className="card-footer">
-                    <span className="price">₹{item.price}</span>
+                    <span className="price">
+                      ₹{item.price}
+                    </span>
 
                     {item.dietaryInfo && (
-                      <span className="diet">{item.dietaryInfo}</span>
+                      <span className="diet">
+                        {item.dietaryInfo}
+                      </span>
                     )}
 
                     <span
@@ -82,8 +97,16 @@ export default function MenuItems() {
                           : "status inactive"
                       }
                     >
-                      {item.isAvailable ? "Available" : "Unavailable"}
+                      {item.isAvailable
+                        ? "Available"
+                        : "Unavailable"}
                     </span>
+
+                    <DeleteButton
+                      id={item._id}
+                      onDelete={handleDeleteItem}
+                      confirmMessage="Delete this item?"
+                    />
                   </div>
                 </div>
               </div>
