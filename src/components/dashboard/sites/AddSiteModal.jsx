@@ -9,25 +9,26 @@ export default function AddSiteModal({
   organizationId,
   onClose,
 }) {
-  const [siteName, setSiteName] =
-    useState("");
-  const [location, setLocation] =
-    useState("");
-  const [loading, setLoading] =
-    useState(false);
-  const [error, setError] =
-    useState("");
-  const [success, setSuccess] =
-    useState("");
+  const [siteName, setSiteName] = useState("");
+  const [addressLine, setAddressLine] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !siteName.trim() ||
-      !location.trim()
-    ) {
-      setError("All fields are required");
+    if (!siteName) {
+      setError("Site name is required");
+      return;
+    }
+
+    if (!organizationId && !localStorage.getItem("organizationId")) {
+      setError("Organization ID not found");
       return;
     }
 
@@ -35,25 +36,34 @@ export default function AddSiteModal({
     setError("");
 
     try {
-      await siteApi.addSite({
-        siteName: siteName.trim(),
-        location: location.trim(),
-        organizationId,
-      });
+      const payload = {
+        siteName,
+        organizationId:
+          organizationId ||
+          localStorage.getItem("organizationId"),
+        address: {
+          addressLine,
+          city,
+          state,
+          postalCode,
+          zipCode,
+          countryCode: "IN",
+        },
+      };
 
-      setSuccess(
-        "Site added successfully! 🎉"
-      );
+      await siteApi.addSite(payload);
+
+      setSuccess("Site created successfully ✅");
 
       setTimeout(() => {
         onClose();
-      }, 1200);
-    } catch (err) {
-      console.error(
-        "Add site failed",
-        err
+      }, 800);
+    } catch (error) {
+      console.error("Add site failed", error);
+      setError(
+        error.response?.data?.message ||
+          "Failed to create site"
       );
-      setError("Failed to add site");
     } finally {
       setLoading(false);
     }
@@ -65,9 +75,7 @@ export default function AddSiteModal({
 
       <Modal title="Add Site">
         {error && (
-          <p className="error-text">
-            {error}
-          </p>
+          <p className="error-text">{error}</p>
         )}
 
         <form onSubmit={handleSubmit}>
@@ -80,10 +88,42 @@ export default function AddSiteModal({
           />
 
           <Input
-            placeholder="Location"
-            value={location}
+            placeholder="Address Line"
+            value={addressLine}
             onChange={(e) =>
-              setLocation(e.target.value)
+              setAddressLine(e.target.value)
+            }
+          />
+
+          <Input
+            placeholder="City"
+            value={city}
+            onChange={(e) =>
+              setCity(e.target.value)
+            }
+          />
+
+          <Input
+            placeholder="State"
+            value={state}
+            onChange={(e) =>
+              setState(e.target.value)
+            }
+          />
+
+          <Input
+            placeholder="Postal Code"
+            value={postalCode}
+            onChange={(e) =>
+              setPostalCode(e.target.value)
+            }
+          />
+
+          <Input
+            placeholder="Zip Code"
+            value={zipCode}
+            onChange={(e) =>
+              setZipCode(e.target.value)
             }
           />
 

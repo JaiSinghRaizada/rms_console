@@ -2,30 +2,44 @@ import { useEffect, useState } from "react";
 import { menuItemApi } from "../../../api/menuItemApi";
 import AddMenuItem from "./AddMenuItem";
 import DashboardLayout from "../DashboardLayout";
+import { DeleteButton, Loader, SuccessToast } from "../../../common";
 import "./menu.css";
-import { DeleteButton } from "../../../common";
 
 export default function MenuItems() {
   const [items, setItems] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
+  /* ==========================
+     FETCH ITEMS
+  ========================== */
   const fetchItems = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await menuItemApi.getAll();
       setItems(data || []);
-    } catch {
+    } catch (err) {
+      console.error("Failed to fetch items", err);
       setItems([]);
     } finally {
       setLoading(false);
     }
   };
 
+  /* ==========================
+     DELETE ITEM
+  ========================== */
   const handleDeleteItem = async (menuItemId) => {
     if (!menuItemId) return;
-    await menuItemApi.delete(menuItemId);
-    fetchItems();
+
+    try {
+      await menuItemApi.delete(menuItemId);
+      setSuccess("Item deleted successfully ✅");
+      fetchItems();
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
   };
 
   useEffect(() => {
@@ -34,6 +48,8 @@ export default function MenuItems() {
 
   return (
     <DashboardLayout>
+      <SuccessToast message={success} />
+
       {showAdd && (
         <AddMenuItem
           onSuccess={fetchItems}
@@ -44,6 +60,7 @@ export default function MenuItems() {
       <div className="page">
         <div className="page-header">
           <h2>Menu Items</h2>
+
           <button
             className="btn-primary"
             onClick={() => setShowAdd(true)}
@@ -54,7 +71,7 @@ export default function MenuItems() {
 
         <div className="menu-item-grid">
           {loading ? (
-            <p>Loading...</p>
+            <Loader />
           ) : items.length === 0 ? (
             <p>No items added yet</p>
           ) : (

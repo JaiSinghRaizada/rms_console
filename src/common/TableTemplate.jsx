@@ -22,33 +22,33 @@ const TableTemplate = ({
   const [showAdd, setShowAdd] = useState(false);
   const [success, setSuccess] = useState("");
 
-  /* ==========================
-     FETCH LIST
-  ========================== */
-  const fetchList = async () => {
-    setLoading(true);
+// ==========================
+// FETCH DATA
+// ==========================
 
-    try {
-      let result =
-        typeof apiGetList === "function"
-          ? await apiGetList(fetchParams)
-          : apiGetList;
+const fetchList = async () => {
+  setLoading(true);
 
-      if (result?.data) result = result.data;
+  try {
+    let result =
+      typeof apiGetList === "function"
+        ? await apiGetList()   // NO PARAMS
+        : apiGetList;
 
-      setItems(Array.isArray(result) ? result : []);
-    } catch (err) {
-      console.error("Fetch failed:", err);
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (result?.data) result = result.data;
 
-  useEffect(() => {
-    fetchList();
-  }, []);
+    setItems(Array.isArray(result) ? result : []);
+  } catch (err) {
+    console.error("Failed to fetch:", err);
+    setItems([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
+useEffect(() => {
+  fetchList();
+}, []);
   /* ==========================
      DELETE
   ========================== */

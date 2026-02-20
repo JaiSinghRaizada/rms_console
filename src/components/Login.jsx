@@ -20,47 +20,49 @@ export default function Login() {
   // -------------------------
   // Login Handler
   // -------------------------
-  const handleLogin = async () => {
-    setLoading(true);
-    setError("");
+const handleLogin = async () => {
+  setLoading(true);
+  setError("");
 
-    try {
-      // 🔐 LOGIN
-      const res = await authApi.login({
-        identifier: email.trim(),
-        password,
-      });
+  try {
+    // 🔐 LOGIN
+    const res = await authApi.login({
+      identifier: email.trim(),
+      password,
+    });
 
-      // 🧹 CLEAR OLD DATA
-      localStorage.clear();
+    localStorage.clear();
 
-      // ✅ TOKEN
-      const token = res.token;
-      localStorage.setItem("token", token);
-      localStorage.setItem("accessToken", token);
+    // ✅ TOKEN
+    const token = res.token;
+    localStorage.setItem("token", token);
+    localStorage.setItem("accessToken", token);
 
-      // 🔎 DECODE TOKEN → USERNAME
-      const decoded = jwtDecode(token);
-      const userSub = decoded.sub;
-      localStorage.setItem("userSub", userSub);
+    // 🔎 DECODE TOKEN → USERNAME
+    const decoded = jwtDecode(token);
+    const userSub = decoded.sub;
+    localStorage.setItem("userSub", userSub);
 
-      // 👤 FETCH USER (SOURCE OF TRUTH)
-      const user = await userApi.getByUserSub(userSub);
+    // 👤 FETCH USER (SOURCE OF TRUTH)
+    const user = await userApi.getByUserSub(userSub);
 
-      // ✅ STORE ROLE + ORGANIZATION
-      localStorage.setItem("userRole", user.role);
+    // ✅ STORE ROLE
+    localStorage.setItem("userRole", user.role);
 
-      if (user.organizationId) {
-        localStorage.setItem("organizationId", user.organizationId);
-      }
-
-      navigate("/dashboard");
-    } catch (err) {
-      setError(authErrorHandler(err));
-    } finally {
-      setLoading(false);
+    // ✅ STORE ORGANIZATION
+    if (user.organizationId) {
+      localStorage.setItem("organizationId", user.organizationId);
+    } else {
+      console.warn("No organizationId found in user");
     }
-  };
+
+    navigate("/dashboard");
+  } catch (err) {
+    setError(authErrorHandler(err));
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
