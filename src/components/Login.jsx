@@ -4,7 +4,7 @@ import { authApi } from "../api/apiservice";
 import { authErrorHandler } from "../api/errorHandler";
 import { userApi } from "../api/userApi";
 import { jwtDecode } from "jwt-decode";
-
+import { organizationApi } from "../api/organizationApi";
 import login from "../assets/login.png";
 import atIcon from "../assets/at.png";
 import lockIcon from "../assets/lock.png";
@@ -43,20 +43,33 @@ const handleLogin = async () => {
     const userSub = decoded.sub;
     localStorage.setItem("userSub", userSub);
 
-    // 👤 FETCH USER (SOURCE OF TRUTH)
+    // 👤 FETCH USER
     const user = await userApi.getByUserSub(userSub);
+    console.log("User object:", user);
 
-    // ✅ STORE ROLE
     localStorage.setItem("userRole", user.role);
 
-    // ✅ STORE ORGANIZATION
-    if (user.organizationId) {
-      localStorage.setItem("organizationId", user.organizationId);
+    // 🔥 FETCH ORGANIZATION
+    const orgRes = await organizationApi.getOrganizations();
+    console.log("Organization response:", orgRes);
+
+    // Depending on backend structure
+    let orgId = null;
+
+    if (Array.isArray(orgRes) && orgRes.length > 0) {
+      orgId = orgRes[0].organizationId;
+    } else if (orgRes?.organizationId) {
+      orgId = orgRes.organizationId;
+    }
+
+    if (orgId) {
+      localStorage.setItem("organizationId", orgId);
     } else {
-      console.warn("No organizationId found in user");
+      console.warn("No organizationId found");
     }
 
     navigate("/dashboard");
+
   } catch (err) {
     setError(authErrorHandler(err));
   } finally {

@@ -316,7 +316,10 @@
   border-radius: 6px;
   border: 1px solid #ddd;
 }
-
+.time-row {
+  display: flex;
+  gap: 12px;
+}
 /* Buttons */
 .modal-actions {
   display: flex;

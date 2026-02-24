@@ -1,6 +1,6 @@
 import http from "./http";
 
-const ORG_BASE = "/organization-service/organization";
+const ORG_BASE = "/organization";
 
 export const organizationApi = {
   getOrganizations: async () => {
