@@ -1,7 +1,7 @@
 import http from "./http";
 
 const MENU_API = "/menu";
-const ADDMENU_API = "/menu-service";
+const ADDMENU_API = "/menu";
 export const menuApi = {
   // ✅ ADD MENU (FIXED)
   add: async (payload) => {
