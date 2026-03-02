@@ -1,4 +1,3 @@
-import { Pencil, Power } from "lucide-react";
 import AddSiteModal from "./AddSiteModal";
 import { siteApi } from "../../../api/siteApi";
 import DashboardLayout from "../DashboardLayout";
@@ -6,7 +5,6 @@ import TableTemplate from "../../../common/TableTemplate";
 import "./sites.css";
 
 export default function Sites() {
-
   const userRole = localStorage.getItem("userRole");
 
   const canManageSites =
@@ -14,7 +12,7 @@ export default function Sites() {
     userRole === "SUPER_ADMIN";
 
   // ============================
-  // FETCH 
+  // FETCH
   // ============================
   const getSites = async () => {
     try {
@@ -26,26 +24,12 @@ export default function Sites() {
     }
   };
 
-  
-
   // ============================
   // DELETE
   // ============================
   const deleteSite = async (siteId) => {
     if (!canManageSites) return;
     await siteApi.deleteSite(siteId);
-  };
-
-  // ============================
-  // TOGGLE STATUS
-  // ============================
-  const toggleStatus = async (site) => {
-    if (!canManageSites) return;
-
-    await siteApi.updateSiteStatus(
-      site.siteId, // use siteId if backend returns siteId
-      !site.isActive
-    );
   };
 
   return (
@@ -60,7 +44,7 @@ export default function Sites() {
 
         <TableTemplate
           title="Site"
-          idKey="siteId"   // IMPORTANT: match backend field
+          idKey="siteId"
           apiGetList={getSites}
           apiDelete={deleteSite}
           AddForm={(props) => (
@@ -69,6 +53,9 @@ export default function Sites() {
           className="sites-table"
           wrapperClass="sites-table-wrapper"
           columns={[
+            // ============================
+            // SITE NAME
+            // ============================
             {
               key: "siteName",
               label: "Site",
@@ -83,48 +70,67 @@ export default function Sites() {
                 </div>
               ),
             },
+
+            // ============================
+            // LOCATION
+            // ============================
             {
               key: "location",
               label: "Location",
-            },
-            {
-              key: "isActive",
-              label: "Status",
               render: (site) => (
-                <span
-                  className={
-                    site.isActive
-                      ? "badge-active"
-                      : "badge-inactive"
-                  }
-                >
-                  {site.isActive ? "Active" : "Inactive"}
+                <span>
+                  {site.address?.city || "N/A"}
                 </span>
               ),
             },
-            {
-              key: "actions",
-              label: "Actions",
-              render: (site) => (
-                <div className="icon-actions">
-                  <button
-                    className="icon-btn"
-                    disabled={!canManageSites}
-                    title="Edit"
-                  >
-                    <Pencil size={16} />
-                  </button>
 
-                  <button
-                    className="icon-btn"
-                    disabled={!canManageSites}
-                    onClick={() => toggleStatus(site)}
-                    title="Activate / Deactivate"
+            // ============================
+            // STATUS (AUTO TIME-BASED)
+            // ============================
+            {
+              key: "status",
+              label: "Status",
+              render: (site) => {
+                if (!site.openTime || !site.closeTime) {
+                  return (
+                    <span className="badge-inactive">
+                      Closed
+                    </span>
+                  );
+                }
+
+                const now = new Date();
+                const currentTime =
+                  now.getHours() * 60 + now.getMinutes();
+
+                const [openHour, openMin] =
+                  site.openTime.split(":").map(Number);
+
+                const [closeHour, closeMin] =
+                  site.closeTime.split(":").map(Number);
+
+                const openTotal =
+                  openHour * 60 + openMin;
+
+                const closeTotal =
+                  closeHour * 60 + closeMin;
+
+                const isOpen =
+                  currentTime >= openTotal &&
+                  currentTime <= closeTotal;
+
+                return (
+                  <span
+                    className={
+                      isOpen
+                        ? "badge-active"
+                        : "badge-inactive"
+                    }
                   >
-                    <Power size={16} />
-                  </button>
-                </div>
-              ),
+                    {isOpen ? "Open" : "Closed"}
+                  </span>
+                );
+              },
             },
           ]}
         />

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
+import { Pencil, Trash } from "lucide-react";
 import Table from "./table/Table";
 import LoadingRow from "./table/LoadingRow";
 import EmptyRow from "./table/EmptyRow";
-import DeleteButton from "./actions/DeleteButton";
 import SuccessToast from "./SuccessToast";
 
 const TableTemplate = ({
   title,
-  columns = [],             // [{ key, label, render? }]
+  columns = [],
   idKey = "id",
   apiGetList,
   apiDelete,
@@ -15,44 +15,57 @@ const TableTemplate = ({
   onRowClick = null,
   className = "",
   wrapperClass = "",
-  fetchParams = null,       // optional params for API
 }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [success, setSuccess] = useState("");
 
-// ==========================
-// FETCH DATA
-// ==========================
+  // ==========================
+  // FETCH DATA
+  // ==========================
+  const fetchList = async () => {
+    setLoading(true);
+    try {
+      let result =
+        typeof apiGetList === "function"
+          ? await apiGetList()
+          : apiGetList;
 
-const fetchList = async () => {
-  setLoading(true);
+      if (result?.data) result = result.data;
 
-  try {
-    let result =
-      typeof apiGetList === "function"
-        ? await apiGetList()   // NO PARAMS
-        : apiGetList;
+      setItems(Array.isArray(result) ? result : []);
+    } catch (err) {
+      console.error("Failed to fetch:", err);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    if (result?.data) result = result.data;
+  useEffect(() => {
+    fetchList();
+  }, []);
 
-    setItems(Array.isArray(result) ? result : []);
-  } catch (err) {
-    console.error("Failed to fetch:", err);
-    setItems([]);
-  } finally {
-    setLoading(false);
-  }
-};
+  // ==========================
+  // AUTO HIDE SUCCESS
+  // ==========================
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
-useEffect(() => {
-  fetchList();
-}, []);
-  /* ==========================
-     DELETE
-  ========================== */
+  // ==========================
+  // DELETE
+  // ==========================
   const handleDelete = async (id) => {
+    if (!apiDelete) return;
+
     try {
       await apiDelete(id);
       setSuccess(`${title} deleted successfully ✅`);
@@ -64,7 +77,6 @@ useEffect(() => {
 
   return (
     <div>
-
       <SuccessToast message={success} />
 
       {/* HEADER */}
@@ -74,7 +86,10 @@ useEffect(() => {
         {AddForm && (
           <button
             className="btn-primary"
-            onClick={() => setShowAdd(true)}
+            onClick={() => {
+              setEditingItem(null);
+              setShowAdd(true);
+            }}
           >
             + Add {title}
           </button>
@@ -85,7 +100,7 @@ useEffect(() => {
       <Table
         columns={[
           ...columns.map((c) => c.label),
-          "Action",
+          "Actions",
         ]}
         className={className}
         wrapperClass={wrapperClass}
@@ -116,24 +131,51 @@ useEffect(() => {
                 </td>
               ))}
 
+              {/* ACTION COLUMN (GLOBAL) */}
               <td align="right">
-                <DeleteButton
-                  id={row[idKey]}
-                  onDelete={handleDelete}
-                  confirmMessage={`Delete this ${title.toLowerCase()}?`}
-                />
+                <div className="icon-actions">
+                  {/* EDIT */}
+                  {AddForm && (
+                    <button
+                      className="icon-btn"
+                      onClick={() => {
+                        setEditingItem(row);
+                        setShowAdd(true);
+                      }}
+                      title="Edit"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                  )}
+
+                  {/* DELETE */}
+                  {apiDelete && (
+                    <button
+                      className="icon-btn delete-btn"
+                      onClick={() =>
+                        handleDelete(row[idKey])
+                      }
+                      title="Delete"
+                    >
+                      <Trash size={16} />
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))
         )}
       </Table>
 
-      {/* ADD MODAL */}
+      {/* ADD / EDIT MODAL */}
       {AddForm && showAdd && (
         <AddForm
+          editingItem={editingItem}
           onClose={() => {
             setShowAdd(false);
+            setEditingItem(null);
             fetchList();
+            setSuccess(`${title} saved successfully ✅`);
           }}
         />
       )}

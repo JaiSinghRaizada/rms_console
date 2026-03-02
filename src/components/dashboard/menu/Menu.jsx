@@ -19,24 +19,29 @@ export default function Menu() {
      FETCH MENUS + SITES
   ========================== */
   const fetchMenus = async () => {
-    if (!organizationId) return [];
-
+  try {
     const [menusRes, sitesRes] =
       await Promise.all([
         menuApi.getAll(),
-        siteApi.getAll(organizationId),
+        siteApi.getAll(), // REMOVE organizationId
       ]);
 
+    const menus = menusRes?.data ?? menusRes ?? [];
+    const sites = sitesRes?.data ?? sitesRes ?? [];
+
     const map = {};
-    sitesRes.forEach((site) => {
-      map[String(site.siteId)] =
-        site.siteName;
+    sites.forEach((site) => {
+      map[String(site.siteId)] = site.siteName;
     });
 
     setSitesMap(map);
 
-    return menusRes || [];
-  };
+    return menus;
+  } catch (error) {
+    console.error("Failed to fetch menus:", error);
+    return [];
+  }
+};
 
   return (
     <DashboardLayout>
