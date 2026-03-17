@@ -12,6 +12,7 @@ import VerifyOtp from "./components/VerifyOtp";
 import MenuCategories from "./components/dashboard/menu/MenuCategories";
 import MenuItems from "./components/dashboard/menu/MenuItems";
 import Users from "./components/dashboard/user/Users";
+import SiteDetails from "./components/dashboard/sites/siteDetails";
 
 import "./App.css";
 
@@ -74,6 +75,7 @@ function App() {
           {/* Dashboard pages */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/sites" element={<Sites />} />
+          <Route path="/sites/:siteId" element={<SiteDetails />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/menus/:menuId" element={<MenuCategories />} />
           <Route path="/menu-items/:categoryId" element={<MenuItems />} />

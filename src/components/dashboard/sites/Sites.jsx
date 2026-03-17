@@ -3,8 +3,11 @@ import { siteApi } from "../../../api/siteApi";
 import DashboardLayout from "../DashboardLayout";
 import TableTemplate from "../../../common/TableTemplate";
 import "./sites.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Sites() {
+  const navigate = useNavigate(); // ✅ FIXED (inside component)
+
   const userRole = localStorage.getItem("userRole");
 
   const canManageSites =
@@ -32,6 +35,13 @@ export default function Sites() {
     await siteApi.deleteSite(siteId);
   };
 
+  // ============================
+  // NAVIGATION
+  // ============================
+  const handleRowClick = (site) => {
+    navigate(`/sites/${site.siteId}`);
+  };
+
   return (
     <DashboardLayout>
       <div className="sites-page">
@@ -47,6 +57,7 @@ export default function Sites() {
           idKey="siteId"
           apiGetList={getSites}
           apiDelete={deleteSite}
+          
           AddForm={(props) => (
             <AddSiteModal {...props} />
           )}
@@ -57,19 +68,26 @@ export default function Sites() {
             // SITE NAME
             // ============================
             {
-              key: "siteName",
-              label: "Site",
-              render: (site) => (
-                <div className="site-name">
-                  <div className="site-avatar">
-                    {site.siteName?.charAt(0)}
-                  </div>
-                  <span className="site-title">
-                    {site.siteName}
-                  </span>
-                </div>
-              ),
-            },
+  key: "siteName",
+  label: "Site",
+  render: (site) => (
+    <div className="site-name">
+      <div className="site-avatar">
+        {site.siteName?.charAt(0)}
+      </div>
+
+      <span
+        className="site-title clickable"
+        onClick={(e) => {
+          e.stopPropagation(); // 🔥 VERY IMPORTANT
+          navigate(`/sites/${site.siteId}`);
+        }}
+      >
+        {site.siteName}
+      </span>
+    </div>
+  ),
+},
 
             // ============================
             // LOCATION
@@ -85,7 +103,7 @@ export default function Sites() {
             },
 
             // ============================
-            // STATUS (AUTO TIME-BASED)
+            // STATUS
             // ============================
             {
               key: "status",

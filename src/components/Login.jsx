@@ -48,9 +48,21 @@ const handleLogin = async () => {
     console.log("User object:", user);
 
     localStorage.setItem("userRole", user.role);
+    navigate("/dashboard");
 
-    // 🔥 FETCH ORGANIZATION
-    const orgRes = await organizationApi.getOrganizations();
+
+    // 🏢 FETCH ORGANIZATION
+const siteRes = await organizationApi.getSiteById(user.siteId);
+console.log("Site response:", siteRes);
+
+// handle array response
+const site = Array.isArray(siteRes) ? siteRes[0] : siteRes;
+
+if (site?.organizationId) {
+  localStorage.setItem("organizationId", site.organizationId);
+} else {
+  console.warn("No organizationId found");
+}
     console.log("Organization response:", orgRes);
 
     // Depending on backend structure
@@ -68,8 +80,7 @@ const handleLogin = async () => {
       console.warn("No organizationId found");
     }
 
-    navigate("/dashboard");
-
+    
   } catch (err) {
     setError(authErrorHandler(err));
   } finally {

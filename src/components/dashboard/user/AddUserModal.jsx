@@ -1,17 +1,18 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { userApi } from "../../../api/usersApi";
+import { organizationApi } from "../../../api/organizationApi";
 import { errorHandler } from "../../../api/errorHandler";
 import "./menu.css";
 
 export default function AddUserModal({ onClose }) {
-  const organizationId = localStorage.getItem("organizationId");
-
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [sites, setSites] = useState([]);
+
   // =============================
-  // ROLE LIST (Restaurant System)
+  // ROLE LIST
   // =============================
   const roleList = [
     "Super Admin",
@@ -30,7 +31,18 @@ export default function AddUserModal({ onClose }) {
   ];
 
   // =============================
-  // COUNTRY LIST (20+ Countries)
+  // USER TYPE ENUM
+  // =============================
+  const userTypeList = [
+    { value: "FULL_TIME", label: "Full Time" },
+    { value: "PART_TIME", label: "Part Time" },
+    { value: "CONTRACT", label: "Contract" },
+    { value: "INTERN", label: "Intern" },
+    { value: "TEMPORARY", label: "Temporary" },
+  ];
+
+  // =============================
+  // COUNTRY LIST
   // =============================
   const countryList = [
     { name: "India", code: "IN" },
@@ -40,22 +52,11 @@ export default function AddUserModal({ onClose }) {
     { name: "Australia", code: "AU" },
     { name: "Germany", code: "DE" },
     { name: "France", code: "FR" },
-    { name: "Italy", code: "IT" },
-    { name: "Spain", code: "ES" },
-    { name: "Brazil", code: "BR" },
-    { name: "Mexico", code: "MX" },
-    { name: "Japan", code: "JP" },
-    { name: "China", code: "CN" },
-    { name: "South Korea", code: "KR" },
-    { name: "Singapore", code: "SG" },
-    { name: "Malaysia", code: "MY" },
-    { name: "UAE", code: "AE" },
-    { name: "South Africa", code: "ZA" },
-    { name: "Netherlands", code: "NL" },
-    { name: "Sweden", code: "SE" },
-    { name: "Switzerland", code: "CH" },
   ];
 
+  // =============================
+  // FORM STATE
+  // =============================
   const [form, setForm] = useState({
     userName: "",
     email: "",
@@ -66,6 +67,8 @@ export default function AddUserModal({ onClose }) {
     dateOfBirth: "",
     profilePictureUrl: "",
     role: "",
+    userType: "",
+    siteId: "",
     addressLine: "",
     postalCode: "",
     countryCode: "",
@@ -73,6 +76,22 @@ export default function AddUserModal({ onClose }) {
     state: "",
     zipCode: "",
   });
+
+  // =============================
+  // FETCH SITES
+  // =============================
+  useEffect(() => {
+    const fetchSites = async () => {
+      try {
+        const res = await organizationApi.getAllSites();
+        setSites(res);
+      } catch (err) {
+        console.error("Failed to load sites", err);
+      }
+    };
+
+    fetchSites();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -90,14 +109,16 @@ export default function AddUserModal({ onClose }) {
         return "Enter a valid email";
       if (!form.firstName.trim()) return "First name required";
       if (!form.lastName.trim()) return "Last name required";
-      if (!form.role) return "Please select a role";
+      if (!form.role) return "Select role";
+      if (!form.userType) return "Select user type";
+      if (!form.siteId) return "Select site";
     }
 
     if (step === 2) {
       if (!form.contactNumber) return "Contact number required";
       if (form.contactNumber.length < 10)
         return "Contact number must be at least 10 digits";
-      if (!form.gender) return "Please select gender";
+      if (!form.gender) return "Select gender";
       if (!form.dateOfBirth) return "Date of birth required";
     }
 
@@ -112,11 +133,8 @@ export default function AddUserModal({ onClose }) {
   };
 
   const nextStep = () => {
-    const validationError = validateStep();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    const err = validateStep();
+    if (err) return setError(err);
     setStep((prev) => prev + 1);
   };
 
@@ -129,25 +147,26 @@ export default function AddUserModal({ onClose }) {
   // SUBMIT
   // =============================
   const handleSubmit = async () => {
-    const validationError = validateStep();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    const err = validateStep();
+    if (err) return setError(err);
 
     setLoading(true);
 
     const payload = {
       userName: form.userName.trim(),
       email: form.email.trim(),
+
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
       contactNumber: form.contactNumber,
       gender: form.gender,
       dateOfBirth: form.dateOfBirth,
       profilePictureUrl: form.profilePictureUrl,
-      organizationId,
+
+      userType: form.userType,
+      siteId: form.siteId,
       role: form.role,
+
       address: {
         addressLine: form.addressLine,
         postalCode: form.postalCode,
@@ -163,8 +182,8 @@ export default function AddUserModal({ onClose }) {
       alert("User created successfully ✅");
       onClose();
     } catch (err) {
-      const standardizedError = errorHandler(err);
-      setError(standardizedError.message);
+      const e = errorHandler(err);
+      setError(e.message);
     } finally {
       setLoading(false);
     }
@@ -185,22 +204,32 @@ export default function AddUserModal({ onClose }) {
             <input name="firstName" placeholder="First Name" onChange={handleChange} />
             <input name="lastName" placeholder="Last Name" onChange={handleChange} />
 
-            <select name="role" onChange={handleChange} value={form.role}>
+            <select name="role" onChange={handleChange}>
               <option value="">Select Role</option>
-              {roleList.map((role) => (
-                <option key={role} value={role}>
-                  {role}
+              {roleList.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+
+            <select name="userType" onChange={handleChange}>
+              <option value="">Select User Type</option>
+              {userTypeList.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+
+            <select name="siteId" onChange={handleChange}>
+              <option value="">Select Site</option>
+              {sites.map((s) => (
+                <option key={s.siteId} value={s.siteId}>
+                  {s.siteName || s.siteId}
                 </option>
               ))}
             </select>
 
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={onClose}>
-                Cancel
-              </button>
-              <button className="btn-primary" onClick={nextStep}>
-                Next →
-              </button>
+              <button onClick={onClose}>Cancel</button>
+              <button onClick={nextStep}>Next →</button>
             </div>
           </>
         )}
@@ -218,15 +247,10 @@ export default function AddUserModal({ onClose }) {
             </select>
 
             <input type="date" name="dateOfBirth" onChange={handleChange} />
-            <input name="profilePictureUrl" placeholder="Profile Image URL" onChange={handleChange} />
 
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={prevStep}>
-                ← Back
-              </button>
-              <button className="btn-primary" onClick={nextStep}>
-                Next →
-              </button>
+              <button onClick={prevStep}>← Back</button>
+              <button onClick={nextStep}>Next →</button>
             </div>
           </>
         )}
@@ -241,7 +265,7 @@ export default function AddUserModal({ onClose }) {
               <option value="">Select Country</option>
               {countryList.map((c) => (
                 <option key={c.code} value={c.code}>
-                  {c.name} ({c.code})
+                  {c.name}
                 </option>
               ))}
             </select>
@@ -251,14 +275,8 @@ export default function AddUserModal({ onClose }) {
             <input name="zipCode" placeholder="Zip Code" onChange={handleChange} />
 
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={prevStep}>
-                ← Back
-              </button>
-              <button
-                className="btn-primary"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
+              <button onClick={prevStep}>← Back</button>
+              <button onClick={handleSubmit} disabled={loading}>
                 {loading ? "Saving..." : "Create User"}
               </button>
             </div>

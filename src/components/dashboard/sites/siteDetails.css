@@ -1,0 +1,114 @@
+/* PAGE */
+.site-details-page {
+  padding: 24px;
+  background: #f5f6f8;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.site-header {
+  background: white;
+  padding: 20px 24px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  border-left: 6px solid #ff7a00; /* ORANGE ACCENT */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.site-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #222;
+}
+
+.site-header p {
+  color: #777;
+  margin-top: 4px;
+}
+
+/* GRID */
+.site-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* CARDS */
+.card {
+  background: white;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+  border: 1px solid #eee;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.card h4 {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.card p {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+}
+
+/* STATUS BADGE */
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-open {
+  background: #e6f7ee;
+  color: #1fa971;
+}
+
+.status-closed {
+  background: #ffeaea;
+  color: #d64545;
+}
+
+/* MAP CONTAINER */
+.map-container {
+  background: white;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.map-container iframe {
+  border-radius: 12px;
+}
+
+/* ACTION BUTTON (OPTIONAL) */
+.map-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.map-btn {
+  background: #ff7a00;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.map-btn:hover {
+  background: #e96d00;
+}

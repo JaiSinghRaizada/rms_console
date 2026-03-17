@@ -17,7 +17,7 @@ export const siteApi = {
     const { data } = await http.post(SITE_API, payload);
     return data?.data ?? [];
   },
-
+  
   // ==================================================
   // ✅ GET SITES BY ORGANIZATION
   // GET /api/site/getSite?organizationId=xxx
@@ -47,15 +47,11 @@ export const siteApi = {
   // ✅ GET SITE BY ID
   // GET /api/site/getSite?siteId=xxx
   // ==================================================
-  getById: async (siteId) => {
-    if (!siteId) return null;
-
-    const { data } = await http.get(`${SITE_API}/getSite`, {
-      params: { siteId },
-    });
-
-    return data?.data ?? null;
-  },
+// add this if not present
+getById: async (siteId) => {
+  const { data } = await http.get(`/site/getSite?siteId=${siteId}`);
+  return data?.data?.[0] ?? null;
+},
 
   // ==================================================
   // ✅ UPDATE SITE

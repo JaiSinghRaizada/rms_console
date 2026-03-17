@@ -380,3 +380,14 @@
   height: 20px;
   object-fit: contain;
 }
+.site-title.clickable {
+  cursor: pointer;
+  color: #222;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.site-title.clickable:hover {
+  color: #ff7a00; /* orange theme */
+  
+}
