@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { userApi } from "../../../api/usersApi";
+import { userApi } from "../../../api/userApi";
 import { organizationApi } from "../../../api/organizationApi";
 import { errorHandler } from "../../../api/errorHandler";
 import "./menu.css";

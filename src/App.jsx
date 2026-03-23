@@ -13,6 +13,7 @@ import MenuCategories from "./components/dashboard/menu/MenuCategories";
 import MenuItems from "./components/dashboard/menu/MenuItems";
 import Users from "./components/dashboard/user/Users";
 import SiteDetails from "./components/dashboard/sites/siteDetails";
+import SchedulePage from "./components/dashboard/schedule/SchedulePage";
 
 import "./App.css";
 
@@ -80,6 +81,7 @@ function App() {
           <Route path="/menus/:menuId" element={<MenuCategories />} />
           <Route path="/menu-items/:categoryId" element={<MenuItems />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/schedule" element={<SchedulePage />} />
         </Routes>
       </BrowserRouter>
     </LoadScript>

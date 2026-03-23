@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import DashboardLayout from "../DashboardLayout";
 import "./menu.css";
-import { userApi } from "../../../api/usersApi";
+import { userApi } from "../../../api/userApi";
 import AddUserModal from "./AddUserModal";
 
 export default function Users() {
@@ -12,24 +12,36 @@ export default function Users() {
 
   const organizationId = localStorage.getItem("organizationId");
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const allUsers = await userApi.getAll();
+const fetchUsers = async () => {
+  setLoading(true);
 
-      // filter by organization
-      const filtered = allUsers.filter(
-        (u) => u.organizationId === organizationId
-      );
+  try {
+    const organizationId = localStorage.getItem("organizationId");
 
-      setUsers(filtered);
-    } catch (err) {
-      console.error("Failed to fetch users", err);
-      setUsers([]);
-    } finally {
-      setLoading(false);
+    console.log("OrganizationId:", organizationId);
+
+    let usersData = [];
+
+    if (organizationId) {
+      usersData = await userApi.getByOrganizationId(organizationId);
+    } else {
+      console.warn("No orgId → fallback");
+      usersData = await userApi.getAll();
     }
-  };
+
+    // ✅ Always remove super admin (safety)
+    const filtered = usersData.filter(
+      (u) => !u.role?.toUpperCase().includes("SUPER")
+    );
+
+    setUsers(filtered);
+  } catch (err) {
+    console.error(err);
+    setUsers([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchUsers();

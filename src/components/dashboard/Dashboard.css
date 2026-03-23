@@ -58,7 +58,7 @@
   flex-direction: column;
   padding: 20px 28px;
   background: #ffffff; /* keep white */
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* ================================

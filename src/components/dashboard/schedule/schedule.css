@@ -1,0 +1,97 @@
+.schedule-grid-page {
+  padding: 24px;
+  background: white !important;
+  min-height: 100%;
+}
+
+.schedule-grid-page h2 {
+  margin-bottom: 16px;
+}
+
+/* TABLE */
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgb(255, 255, 255);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* HEADER */
+.schedule-table th {
+  background: #f1f2f4;
+  text-align: left;
+  padding: 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* ROWS */
+.schedule-table td {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  vertical-align: top;
+}
+
+/* DAY COLUMN */
+.day-cell {
+  font-weight: 600;
+  color: #222;
+}
+
+/* SHIFT BLOCK */
+.shift-row {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border-left: 4px solid #ff7a00;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* INPUTS */
+.shift-row select,
+.shift-row input {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  width: 180px;
+}
+
+/* DEPARTMENT */
+.dept-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* BUTTONS */
+.add-shift-btn {
+  background: #ff7a00;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add-dept-btn {
+  background: #e6f7ee;
+  color: #1fa971;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.save-btn {
+  margin-top: 20px;
+  background: #ff7a00;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
